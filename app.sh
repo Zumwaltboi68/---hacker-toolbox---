@@ -71,6 +71,9 @@ function help() {
   echo "  nmap: Perform an Nmap scan."
   echo "  gobuster: Perform a Gobuster scan."
   echo "  msf: Start the Metasploit console."
+  echo "  search: Search for exploits."
+  echo "  payload: Generate a payload."
+  echo "  sessions: Manage Metasploit sessions."
   echo "  exit: Exit the Hacker Toolbox."
 }
 
@@ -107,6 +110,48 @@ function msf() {
   msfconsole
 }
 
+# Define the search function
+function search() {
+  echo "Enter the search term:"
+  read search_term
+  msfvenom --list | grep $search_term
+}
+
+# Define the payload function
+function payload() {
+  echo "Enter the payload type:"
+  read payload_type
+  msfvenom -p $payload_type --list
+}
+
+# Define the sessions function
+function sessions() {
+  echo "Select an action:"
+  select action in "List sessions" "Interact with session" "Kill session" "Exit"; do
+    case $action in
+      "List sessions")
+        msfconsole -x "sessions"
+        ;;
+      "Interact with session")
+        echo "Enter the session ID:"
+        read session_id
+        msfconsole -x "sessions -i $session_id"
+        ;;
+      "Kill session")
+        echo "Enter the session ID:"
+        read session_id
+        msfconsole -x "sessions -k $session_id"
+        ;;
+      "Exit")
+        break
+        ;;
+      *)
+        echo "Invalid choice. Please select a valid option."
+        ;;
+    esac
+  done
+}
+
 # Define the exit function
 function exit() {
   echo "Exiting the Hacker Toolbox."
@@ -116,6 +161,12 @@ function exit() {
 # Create a log file
 log_file="/tmp/hacker_toolbox.log"
 exec &> >(tee -a $log_file)
+
+# Load the configuration file
+config_file="/etc/hacker_toolbox.conf"
+if [ -f $config_file ]; then
+  . $config_file
+fi
 
 # Start the main loop
 while true; do
@@ -130,7 +181,10 @@ while true; do
   echo -e "7. Install additional tools"
   echo -e "8. Help"
   echo -e "9. Clear screen"
-  echo -e "10. Exit"
+  echo -e "10. Search for exploits"
+  echo -e "11. Generate a payload"
+  echo -e "12. Manage Metasploit sessions"
+  echo -e "13. Exit"
 
   # Read the user's choice
   read choice
@@ -165,6 +219,15 @@ while true; do
       clear
       ;;
     10)
+      search
+      ;;
+    11)
+      payload
+      ;;
+    12)
+      sessions
+      ;;
+    13)
       exit
       ;;
     *)
